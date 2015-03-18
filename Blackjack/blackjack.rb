@@ -61,11 +61,11 @@ module Hand
     point
   end
 
-  def busted?
+  def is_busted?
     total_point > 21
   end
 
-  def blackjack?
+  def is_blackjack?
     total_point == 21
   end
 
@@ -87,17 +87,46 @@ class Dealer
     self.name = 'Dealer'
     self.cards = []
   end
+
+  def show_one_card_only
+    puts "=====#{name}'s cards====="
+    puts "First card is hidden"
+    puts "[#{cards[1].suit}  #{cards[1].number}]"
+  end
 end
 
 class Blackjack
-  attr_accessor :player, :dealer, :deck, :winner
+  attr_accessor :player, :dealer, :deck
   def initialize
     puts "What your name??"
     player_name = gets.chomp 
     self.player = Player.new(player_name)
     self.dealer = Dealer.new
     self.deck = Deck.new
-    self.winner = ' '
+  end
+
+  def blackjack_or_busted(player_or_dealer)
+    if player_or_dealer.is_a?(Player)
+      if player_or_dealer.is_busted?
+        puts "#{player_or_dealer.name} busted!!"
+        puts "Dealer Wins!!"
+        play_again?
+      elsif player_or_dealer.is_blackjack?
+        puts "Blackjack!!"
+        puts "#{player_or_dealer.name} Win!!!"
+        play_again?
+      end
+    elsif player_or_dealer.is_a?(Dealer)
+      if player_or_dealer.is_busted?
+        puts "Dealer busted!!!"
+        puts "You Win!!!"
+        play_again?
+      elsif player_or_dealer.is_blackjack?
+        puts "Blackjack!!"
+        puts "Dealer Wins!!"
+        play_again?
+      end
+    end
   end
 
   def hit_or_stay
@@ -113,101 +142,66 @@ class Blackjack
     2.times { player.add_a_card(deck.deal_a_card)}
     2.times { dealer.add_a_card(deck.deal_a_card)}
     player.show_hand
-    dealer.show_hand
+    dealer.show_one_card_only
   end
 
   def player_round
-    if player.blackjack?
-      self.winner = player.name
-      puts "Blackjack!!"
-      return
-    elsif dealer.blackjack?
-      self.winner = dealer.name
-      puts "Blackjack!!"
-      return
-    else
-      loop do
-        if hit_or_stay == 'h'
-          player.add_a_card(deck.deal_a_card)
-          player.show_hand
-          if player.busted?
-            self.winner = dealer.name
-            puts "#{player.name} is busted!!"
-            return
-          elsif player.blackjack?
-            self.winner = player.name
-            puts "Blackjack!!"
-            return
-          end
-        else
-          break
-        end
+    blackjack_or_busted(player)
+    loop do
+      if hit_or_stay == 'h'
+        player.add_a_card(deck.deal_a_card)
+        player.show_hand
+        blackjack_or_busted(player)
+      else
+        break
       end
-    end  
-  end
+    end
+  end  
 
   def dealer_round
-    if dealer.blackjack?
-      self.winner = dealer.name
-      puts "Blackjack!!"
-      return
-    end
+    blackjack_or_busted(dealer)
     while dealer.total_point <= 17
       sleep(2)
       dealer.add_a_card(deck.deal_a_card)
       dealer.show_hand
-      if dealer.busted?
-        self.winner = player.name
-        puts "Dealer is busted!!"
-        break
-      elsif dealer.blackjack?
-        self.winner = dealer.name
-        puts "Blackjack!!"
-        break
-      end
+      blackjack_or_busted(dealer)
     end 
   end
 
   def compare_point
     if player.total_point > dealer.total_point
-      self.winner = player.name
+      puts "#{player.name} Wins!!"
     elsif player.total_point < dealer.total_point
-      self.winner = dealer.name
-    end
-  end
-
-  def end_game
-    if winner == ' '
-      puts "Tie!!"
+      puts "Dealer Wins!!"
     else
-      puts "Winner is #{winner}"
+      puts "Tie!!!"
     end
+    play_again?
   end
 
   def run
     deck.shuffle_deck
     initial_round
     player_round
-    if winner == ' '
-      dealer_round
-      if winner == ' '
-        compare_point
-        end_game
-      else
-        end_game
-      end
+    dealer_round
+    compare_point
+  end
+
+  def reset
+    deck = Deck.new
+    player = Player.new
+  end
+
+  def play_again?
+    puts "=> Start a new Game? Press 'Y' , Exit? Press 'N' "
+    if gets.chomp.downcase == 'y'
+      initialize
+      run
     else
-      end_game
+      exit
     end
   end
 end
 
-def play_again?
-  puts "=> Start a new Game? Press 'Y' , Exit? Press 'N' "
-  gets.chomp.downcase == 'y'
-end
-
-begin
-  blackjack = Blackjack.new
-  blackjack.run
-end while play_again?
+blackjack = Blackjack.new
+blackjack.run
