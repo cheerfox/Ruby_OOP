@@ -166,6 +166,7 @@ class Blackjack
       dealer.show_hand
       blackjack_or_busted(dealer)
     end 
+    dealer.show_hand
   end
 
   def compare_point
@@ -188,14 +189,17 @@ class Blackjack
   end
 
   def reset
+    system('clear')
+    puts "Start a new game!!"
     deck = Deck.new
-    player = Player.new
+    player.cards = []
+    dealer.cards = []
   end
 
   def play_again?
     puts "=> Start a new Game? Press 'Y' , Exit? Press 'N' "
     if gets.chomp.downcase == 'y'
-      initialize
+      reset
       run
     else
       exit
