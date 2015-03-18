@@ -1,33 +1,26 @@
-#classes list
- # Human < Player
- # Computer < Player
- # Board 
- # Game
-
- class Player
+class Player
   attr_accessor :choices, :name, :mark
   def initialize(name, mark)
-    @name = name
-    @mark = mark
-    @choices = []
+    self.name = name
+    self.mark = mark
+    self.choices = []
   end
 end
 
 class Human < Player
   def pick_position(empty_positions)
-    position = 0
     begin
       puts "Choose position from 1 to 9"
       position = gets.chomp.to_i
     end until empty_positions.include?(position)
-    @choices << position 
+    choices << position 
   end
 end
 
 class Computer < Player
   def pick_position(empty_positions)
     position = empty_positions.sample
-    @choices << position
+    choices << position
   end
 end
 
@@ -35,12 +28,12 @@ class Board
   attr_accessor :board_data
   
   def initialize
-    @board_data = {}
-    (1..9).each {|position| @board_data[position] = ' '}
+    self.board_data = {}
+    (1..9).each {|position| self.board_data[position] = ' '}
   end
 
   def board_data_update(choice, mark) 
-    @board_data[choice] = mark
+    self.board_data[choice] = mark
   end
 
   def draw
@@ -73,11 +66,13 @@ class Game
   WINNING_LINES = [[1,2,3], [4,5,6], [7,8,9], [1,4,7], [2,5,8], [3,6,9], [1,5,9], [3,5,7]]
   attr_accessor :human, :computer, :board, :winner, :current_player
 
-  def initialize(name)
-    @human = Human.new(name, 'O')
-    @computer = Computer.new('Computer', 'X')
-    @board = Board.new
-    @current_player = @human
+  def initialize
+    puts "What your name??"
+    player_name = gets.chomp 
+    self.human = Human.new(player_name, 'O')
+    self.computer = Computer.new('Computer', 'X')
+    self.board = Board.new
+    self.current_player = human
   end
 
   def switch_current_player
@@ -90,9 +85,7 @@ class Game
 
   def is_winner?(player)
     WINNING_LINES.each do |line|
-      if (line - player.choices).empty?
-        return true
-      end
+      return true if (line - player.choices).empty?  
     end
     false
   end
@@ -126,7 +119,7 @@ class Game
 end
 
 loop do
-  game = Game.new('Bob')
+  game = Game.new
   game.run
   break unless game.play_again?
 end
