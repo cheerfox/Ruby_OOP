@@ -1,8 +1,8 @@
 class Card
   attr_accessor :suit, :number
   def initialize(suit, number)
-    @suit = suit
-    @number = number
+    self.suit = suit
+    self.number = number
   end
 
   def to_s
@@ -11,13 +11,13 @@ class Card
 end
 
 class Deck
-  SUIT = ['C', 'D', 'H', 'S']
-  NUMBER = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
+  SUITS = ['C', 'D', 'H', 'S']
+  NUMBERS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
   attr_accessor :cards
   def initialize
-    @cards = []
-    SUIT.product(NUMBER) do |pair|
-      @cards << Card.new(pair[0], pair[1])
+    self.cards = []
+    SUITS.product(NUMBERS) do |pair|
+      self.cards << Card.new(pair[0], pair[1])
     end
   end
 
@@ -31,10 +31,11 @@ class Deck
 end
 
 module Hand
+  attr_accessor :cards
   def show_hand
     puts "=====#{name}'s cards====="
     cards.each do |card|
-      puts "[#{card.suit}  #{card.number}]"
+      puts card
     end
     puts "Point: #{total_point}"
   end
@@ -55,7 +56,7 @@ module Hand
         point += number.to_i
       end
     end
-    numbers.select {|e| e == 'A'}.count.times do
+    numbers.select {|number| number == 'A'}.count.times do
       point -= 10 if point > 21
     end
     point
@@ -73,7 +74,7 @@ end
 
 class Player
   include Hand
-  attr_accessor :name, :cards
+  attr_accessor :name
   def initialize(name)
     self.name = name
     self.cards = []
@@ -82,7 +83,7 @@ end
 
 class Dealer
   include Hand
-  attr_accessor :name, :cards
+  attr_accessor :name
   def initialize
     self.name = 'Dealer'
     self.cards = []
@@ -91,7 +92,7 @@ class Dealer
   def show_one_card_only
     puts "=====#{name}'s cards====="
     puts "First card is hidden"
-    puts "[#{cards[1].suit}  #{cards[1].number}]"
+    puts cards
   end
 end
 
@@ -191,7 +192,7 @@ class Blackjack
   def reset
     system('clear')
     puts "Start a new game!!"
-    deck = Deck.new
+    self.deck = Deck.new
     player.cards = []
     dealer.cards = []
   end
